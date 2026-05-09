@@ -1,0 +1,55 @@
+
+import os import cv2
+import numpy as np import matplotlib.pyplot as plt from google.colab.patches import cv2_imshow
+# Configuration variables
+SIZE = 224
+# Task 2, 3, and 4: Your exact Image Processing Pipeline
+def process_this_image(img_path):
+# Use Openc to load the image
+img = cv2. imread (img_path)
+if img is None:
+print("Error: Could not find the image!")
+return None
+# t2 Basic Preprocessing
+resized = cv2.resize(img, (SIZE, SIZE))
+gray = cv2.cvtColor (resized, cv2.COLOR_BGR2GRAY)
+# Apply Histogram Equalization
+equalized = cv2.equalizeHist(gray)
+
+# Normalize
+norm = equalized / 255.0
+prep_img = (norm * 255). astype(np.uint8)
+# t3 Filtering
+blurred = cv2. GaussianBlur (prep_img, (5, 5), 0)
+med _denoised = cv2.medianBlur (blurred, 5)
+# Custom sharpening kernel
+sharp_kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+final_filtered = cv2. filter2D(med _denoised, -1, sharp_kernel)
+# t4 Edge Detection & Segmentation
+edges = cv2. Canny(final_filtered, 100, 200)
+-, segmented = cv2. threshold(final_filtered, 127, 255, cv2. THRESH _BINARY + cv2. THRESH_OTSU)
+return {
+"original": resized,
+"processed": final_filtered,
+"edges": edges,
+"segmented": segmented 
+}
+# --- WHERE TO PUT YOUR PATH - --
+# 1. Click Folder icon on left
+# 2. Upload your image
+# 3. Right-click image
+-> Copy Path
+# 4. Paste it between the quotes below
+MY_IMAGE_PATH = '/content/PrivateTest_ 13164119-jPg'
+# Run the pipeline on your one image
+results = process_this_image(MY_IMAGE_PATH)
+# Display everything so you can see it
+if results:
+print("Step 1: Original/Resized")
+cv2_imshow(results["original"])
+print("Step 2: Processed (Task 3: Denoised & Sharpened)")
+cv2_imshow(results ["processed"])
+print("Step 3: Edges (Task 4: Canny)")
+cv2_imshow(results ["edges"])
+print("Step 4: Segmented (Task 4: Otsu)")
+cv2_imshow(results ["segmented"])
